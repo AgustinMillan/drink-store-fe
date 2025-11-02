@@ -1,0 +1,13 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+}
+
+.layout-content {
+    flex: 1;
+    padding-bottom: 80px;
+    /* Espacio para la navbar fija */
+    overflow-y: auto;
+}
