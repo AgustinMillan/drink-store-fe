@@ -1,5 +1,5 @@
 import axios from 'axios'
-const API_BASE_URL = 'http://vps28235.dreamhostps.com:8002/be/api'
+const API_BASE_URL = 'https://pilot-dev.dreamhosters.com/be/api/'
 
 class ApiService {
   async get(url) {
