@@ -1,0 +1,280 @@
+/* Estilos base del modal overlay - necesarios para que el modal se muestre */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background-color: #1a1a1a;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid rgba(100, 108, 255, 0.3);
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 32px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    padding: 25px;
+}
+
+.modal-button {
+    flex: 1;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.submit-button {
+    background: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
+    color: white;
+}
+
+.submit-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(100, 108, 255, 0.4);
+}
+
+.submit-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.best-prices-modal {
+    max-width: 900px;
+}
+
+.best-prices-content {
+    padding: 25px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.best-prices-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.best-prices-header {
+    display: grid;
+    grid-template-columns: 80px 1fr 150px 200px;
+    gap: 15px;
+    padding: 15px;
+    background-color: rgba(100, 108, 255, 0.1);
+    border-radius: 8px 8px 0 0;
+    border-bottom: 2px solid rgba(100, 108, 255, 0.3);
+}
+
+.best-prices-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.best-price-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 150px 200px;
+    gap: 15px;
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s;
+}
+
+.best-price-row:hover {
+    background-color: rgba(100, 108, 255, 0.05);
+}
+
+.best-price-row:last-child {
+    border-bottom: none;
+    border-radius: 0 0 8px 8px;
+}
+
+.best-price-cell {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.best-price-cell.header-cell {
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.best-price-cell.product-name {
+    font-weight: 500;
+}
+
+.best-price-cell.price-cell {
+    font-weight: bold;
+    color: #4caf50;
+    font-size: 15px;
+}
+
+.best-price-cell.price-cell.empty {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: normal;
+}
+
+.best-price-cell.supplier-name {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.empty-message {
+    text-align: center;
+    padding: 40px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 16px;
+}
+
+/* Light theme */
+@media (prefers-color-scheme: light) {
+    .best-prices-header {
+        background-color: rgba(100, 108, 255, 0.05);
+        border-bottom-color: rgba(100, 108, 255, 0.2);
+    }
+
+    .best-price-row {
+        border-bottom-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .best-price-row:hover {
+        background-color: rgba(100, 108, 255, 0.03);
+    }
+
+    .best-price-cell {
+        color: #213547;
+    }
+
+    .best-price-cell.header-cell {
+        color: rgba(0, 0, 0, 0.7);
+    }
+
+    .best-price-cell.price-cell {
+        color: #2e7d32;
+    }
+
+    .best-price-cell.price-cell.empty {
+        color: rgba(0, 0, 0, 0.5);
+    }
+
+    .best-price-cell.supplier-name {
+        color: rgba(0, 0, 0, 0.7);
+    }
+
+    .empty-message {
+        color: rgba(0, 0, 0, 0.6);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .best-prices-modal {
+        max-width: 100%;
+        margin: 10px;
+    }
+
+    .best-prices-header,
+    .best-price-row {
+        grid-template-columns: 60px 1fr 100px 120px;
+        gap: 10px;
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .best-price-cell {
+        font-size: 12px;
+    }
+
+    .best-price-cell.header-cell {
+        font-size: 10px;
+    }
+}

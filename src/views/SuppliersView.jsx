@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import AddSupplierModal from '../components/AddSupplierModal'
 import EditSupplierModal from '../components/EditSupplierModal'
+import BestPricesModal from '../components/BestPricesModal'
 import { supplierApi, productApi } from '../services/api'
 import './SuppliersView.css'
 
@@ -12,6 +13,13 @@ function SuppliersView() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedSupplier, setSelectedSupplier] = useState(null)
   const [bestPriceLoading, setBestPriceLoading] = useState(false)
+  const [isBestPricesModalOpen, setIsBestPricesModalOpen] = useState(false)
+  const [bestPricesData, setBestPricesData] = useState([])
+
+  // Debug: verificar cuando cambia el estado del modal
+  useEffect(() => {
+    console.log('Estado del modal cambió - isBestPricesModalOpen:', isBestPricesModalOpen, 'bestPricesData:', bestPricesData)
+  }, [isBestPricesModalOpen, bestPricesData])
 
   // Cargar proveedores del backend
   const fetchSuppliers = async () => {
@@ -70,11 +78,15 @@ function SuppliersView() {
     setBestPriceLoading(true)
     try {
       const result = await productApi.getBestPrice()
-      if (result.success) {
-        alert('Mejores precios obtenidos exitosamente')
-        // Opcional: recargar productos si es necesario
+      console.log('Resultado de getBestPrice:', result)
+      if (result && result.success) {
+        console.log('Datos recibidos:', result.data)
+        setBestPricesData(result.data || [])
+        setIsBestPricesModalOpen(true)
+        console.log('Modal debería abrirse, isBestPricesModalOpen:', true)
       } else {
-        alert(result.error || 'Error al obtener los mejores precios')
+        alert(result?.error || 'Error al obtener los mejores precios')
+        console.error('Error en resultado:', result)
       }
     } catch (error) {
       alert('Error de conexión al obtener mejores precios')
@@ -82,6 +94,11 @@ function SuppliersView() {
     } finally {
       setBestPriceLoading(false)
     }
+  }
+
+  const handleCloseBestPricesModal = () => {
+    setIsBestPricesModalOpen(false)
+    setBestPricesData([])
   }
 
   return (
@@ -153,6 +170,13 @@ function SuppliersView() {
         supplier={selectedSupplier}
         onSuccess={handleEditModalSuccess}
         onDelete={handleDeleteSuccess}
+      />
+
+      {/* Modal de mejores precios */}
+      <BestPricesModal
+        isOpen={isBestPricesModalOpen}
+        onClose={handleCloseBestPricesModal}
+        bestPrices={bestPricesData}
       />
     </div>
   )
