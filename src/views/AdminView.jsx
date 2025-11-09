@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { saleApi, productApi } from '../services/api'
+import { saleApi, productApi, businessStateApi } from '../services/api'
 import './AdminView.css'
 
 function AdminView() {
@@ -13,14 +13,18 @@ function AdminView() {
   const [loadingLowStock, setLoadingLowStock] = useState(true)
   const [loadingTodayReport, setLoadingTodayReport] = useState(true)
   const [loadingMonthReport, setLoadingMonthReport] = useState(true)
+  const [balance, setBalance] = useState(null)
+  const [loadingBalance, setLoadingBalance] = useState(true)
+  const [expandedSales, setExpandedSales] = useState(new Set())
   const [error, setError] = useState(null)
 
-  // Cargar ventas del día, reportes financieros y productos con stock bajo automáticamente
+  // Cargar ventas del día, reportes financieros, productos con stock bajo y balance automáticamente
   useEffect(() => {
     fetchTodaySales()
     fetchTodayFinancialReport()
     fetchMonthFinancialReport()
     fetchLowStockProducts()
+    fetchBalance()
   }, [])
 
   const fetchTodaySales = async () => {
@@ -114,6 +118,36 @@ function AdminView() {
     }
   }
 
+  const fetchBalance = async () => {
+    setLoadingBalance(true)
+    setError(null)
+    try {
+      const result = await businessStateApi.getBalance()
+      if (result.success) {
+        setBalance(result.data)
+      } else {
+        setError(result.error || 'Error al cargar el balance')
+      }
+    } catch (err) {
+      setError('Error de conexión con el servidor')
+      console.error('Error fetching balance:', err)
+    } finally {
+      setLoadingBalance(false)
+    }
+  }
+
+  const toggleSaleExpansion = (saleId) => {
+    setExpandedSales(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(saleId)) {
+        newSet.delete(saleId)
+      } else {
+        newSet.add(saleId)
+      }
+      return newSet
+    })
+  }
+
   return (
     <div className="admin-view">
       <div className="admin-header">
@@ -121,6 +155,44 @@ function AdminView() {
       </div>
 
       <div className="admin-content">
+        {/* Sección de Balance */}
+        <div className="admin-section balance-section">
+          <div className="section-header">
+            <h2 className="section-title">BALANCE</h2>
+            <button 
+              className="refresh-button" 
+              onClick={fetchBalance}
+              disabled={loadingBalance}
+            >
+              {loadingBalance ? '🔄' : '🔄'}
+            </button>
+          </div>
+
+          {loadingBalance ? (
+            <div className="loading-message">Cargando balance...</div>
+          ) : error ? (
+            <div className="error-message">
+              {error}
+              <button onClick={fetchBalance} className="retry-button">
+                Reintentar
+              </button>
+            </div>
+          ) : balance ? (
+            <div className="balance-container">
+              <div className="balance-cards">
+                <div className="balance-card stock-value">
+                  <div className="card-label">VALOR TOTAL DEL STOCK</div>
+                  <div className="card-value">${parseFloat(balance.TotalStockValue).toFixed(2)}</div>
+                </div>
+                <div className="balance-card balance-amount">
+                  <div className="card-label">BALANCE</div>
+                  <div className="card-value">${parseFloat(balance.Balance).toFixed(2)}</div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
         {/* Sección de Reporte Financiero del Día */}
         {todayFinancialReport && !loadingTodayReport && (
           <div className="admin-section financial-report-section">
@@ -217,17 +289,63 @@ function AdminView() {
                     <div className="list-header-cell">FECHA</div>
                     <div className="list-header-cell">MONTO</div>
                     <div className="list-header-cell">ITEMS</div>
+                    <div className="list-header-cell">DETALLE</div>
                   </div>
-                  {todaySales.sales.map((sale) => (
-                    <div key={sale.Id} className="sales-list-item">
-                      <div className="list-item-cell">{sale.Id}</div>
-                      <div className="list-item-cell">
-                        {new Date(sale.CreatedAt).toLocaleString('es-AR')}
+                  {todaySales.sales.map((sale) => {
+                    const isExpanded = expandedSales.has(sale.Id)
+                    return (
+                      <div key={sale.Id} className="sales-list-container">
+                        <div 
+                          className={`sales-list-item ${isExpanded ? 'expanded' : ''}`}
+                          onClick={() => toggleSaleExpansion(sale.Id)}
+                        >
+                          <div className="list-item-cell">{sale.Id}</div>
+                          <div className="list-item-cell">
+                            {new Date(sale.CreatedAt).toLocaleString('es-AR')}
+                          </div>
+                          <div className="list-item-cell">${parseFloat(sale.Amount).toFixed(2)}</div>
+                          <div className="list-item-cell">{sale.itemTickets?.length || 0}</div>
+                          <div className="list-item-cell expand-icon">
+                            {isExpanded ? '▼' : '▶'}
+                          </div>
+                        </div>
+                        {isExpanded && sale.itemTickets && sale.itemTickets.length > 0 && (
+                          <div className="sale-details">
+                            <div className="sale-details-header">
+                              <h4>Productos Vendidos</h4>
+                            </div>
+                            <div className="sale-details-list">
+                              <div className="sale-details-list-header">
+                                <div className="detail-header-cell">PRODUCTO</div>
+                                <div className="detail-header-cell">CANTIDAD</div>
+                                <div className="detail-header-cell">PRECIO UNIT.</div>
+                                <div className="detail-header-cell">SUBTOTAL</div>
+                              </div>
+                              {sale.itemTickets.map((item) => (
+                                <div key={item.Id} className="sale-details-item">
+                                  <div className="detail-item-cell product-name">
+                                    <div className="product-info">
+                                      <strong>{item.product?.Name || 'Producto sin nombre'}</strong>
+                                      {item.product?.Description && (
+                                        <span className="product-description">{item.product.Description}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="detail-item-cell">{item.Quantity}</div>
+                                  <div className="detail-item-cell">
+                                    ${(parseFloat(item.Amount) / item.Quantity).toFixed(2)}
+                                  </div>
+                                  <div className="detail-item-cell">
+                                    ${parseFloat(item.Amount).toFixed(2)}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="list-item-cell">${parseFloat(sale.Amount).toFixed(2)}</div>
-                      <div className="list-item-cell">{sale.itemTickets?.length || 0}</div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               ) : (
                 <div className="empty-message">No hay ventas registradas hoy</div>
@@ -366,17 +484,63 @@ function AdminView() {
                     <div className="list-header-cell">FECHA</div>
                     <div className="list-header-cell">MONTO</div>
                     <div className="list-header-cell">ITEMS</div>
+                    <div className="list-header-cell">DETALLE</div>
                   </div>
-                  {monthSales.sales.map((sale) => (
-                    <div key={sale.Id} className="sales-list-item">
-                      <div className="list-item-cell">{sale.Id}</div>
-                      <div className="list-item-cell">
-                        {new Date(sale.CreatedAt).toLocaleString('es-AR')}
+                  {monthSales.sales.map((sale) => {
+                    const isExpanded = expandedSales.has(sale.Id)
+                    return (
+                      <div key={sale.Id} className="sales-list-container">
+                        <div 
+                          className={`sales-list-item ${isExpanded ? 'expanded' : ''}`}
+                          onClick={() => toggleSaleExpansion(sale.Id)}
+                        >
+                          <div className="list-item-cell">{sale.Id}</div>
+                          <div className="list-item-cell">
+                            {new Date(sale.CreatedAt).toLocaleString('es-AR')}
+                          </div>
+                          <div className="list-item-cell">${parseFloat(sale.Amount).toFixed(2)}</div>
+                          <div className="list-item-cell">{sale.itemTickets?.length || 0}</div>
+                          <div className="list-item-cell expand-icon">
+                            {isExpanded ? '▼' : '▶'}
+                          </div>
+                        </div>
+                        {isExpanded && sale.itemTickets && sale.itemTickets.length > 0 && (
+                          <div className="sale-details">
+                            <div className="sale-details-header">
+                              <h4>Productos Vendidos</h4>
+                            </div>
+                            <div className="sale-details-list">
+                              <div className="sale-details-list-header">
+                                <div className="detail-header-cell">PRODUCTO</div>
+                                <div className="detail-header-cell">CANTIDAD</div>
+                                <div className="detail-header-cell">PRECIO UNIT.</div>
+                                <div className="detail-header-cell">SUBTOTAL</div>
+                              </div>
+                              {sale.itemTickets.map((item) => (
+                                <div key={item.Id} className="sale-details-item">
+                                  <div className="detail-item-cell product-name">
+                                    <div className="product-info">
+                                      <strong>{item.product?.Name || 'Producto sin nombre'}</strong>
+                                      {item.product?.Description && (
+                                        <span className="product-description">{item.product.Description}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="detail-item-cell">{item.Quantity}</div>
+                                  <div className="detail-item-cell">
+                                    ${(parseFloat(item.Amount) / item.Quantity).toFixed(2)}
+                                  </div>
+                                  <div className="detail-item-cell">
+                                    ${parseFloat(item.Amount).toFixed(2)}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="list-item-cell">${parseFloat(sale.Amount).toFixed(2)}</div>
-                      <div className="list-item-cell">{sale.itemTickets?.length || 0}</div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               ) : (
                 <div className="empty-message">No hay ventas registradas este mes</div>

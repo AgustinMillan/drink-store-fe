@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { businessMovementApi } from '../services/api'
 import './EditProductModal.css'
 
 function EditProductModal({ isOpen, onClose, product, onSuccess, onDelete }) {
@@ -13,15 +14,19 @@ function EditProductModal({ isOpen, onClose, product, onSuccess, onDelete }) {
   const [loading, setLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
+  const [originalStock, setOriginalStock] = useState(0)
+
   // Cargar datos del producto cuando se abre el modal
   useEffect(() => {
     if (product && isOpen) {
+      const stock = product.Stock || 0
+      setOriginalStock(stock)
       setFormData({
         Name: product.Name || '',
         Description: product.Description || '',
         AmountSupplier: product.AmountSupplier?.toString() || '',
         AmountToSale: product.AmountToSale?.toString() || '',
-        Stock: product.Stock?.toString() || '0'
+        Stock: stock.toString()
       })
       setErrors({})
     }
@@ -86,6 +91,31 @@ function EditProductModal({ isOpen, onClose, product, onSuccess, onDelete }) {
       const result = await productApi.update(product.Id, productData)
 
       if (result.success) {
+        // Si el stock aumentó, crear un movimiento de compra (PURCHASE)
+        const newStock = parseInt(formData.Stock) || 0
+        const stockIncrease = newStock - originalStock
+        
+        if (stockIncrease > 0) {
+          const unitCost = parseInt(formData.AmountSupplier) || 0
+          const movementData = {
+            ProductId: product.Id,
+            SupplierId: null, // No tenemos información del proveedor en este contexto
+            Type: 'IN', // Entrada de stock
+            Reason: 'PURCHASE', // Razón: compra
+            Quantity: stockIncrease,
+            UnitCost: unitCost > 0 ? unitCost : null,
+            TotalAmount: unitCost > 0 ? unitCost * stockIncrease : null,
+            ReferenceId: product.Id,
+            ReferenceType: 'Product'
+          }
+          
+          // Crear el movimiento (no esperamos el resultado para no bloquear la UI)
+          businessMovementApi.create(movementData).catch(error => {
+            console.error('Error al crear movimiento de compra:', error)
+            // No mostramos error al usuario ya que el producto ya fue actualizado
+          })
+        }
+
         onSuccess && onSuccess()
         onClose()
       } else {

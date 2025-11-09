@@ -1,6 +1,6 @@
 import axios from "axios";
-const API_BASE_URL = 'https://pilot-dev.dreamhosters.com/be/api/'
-// const API_BASE_URL = "http://localhost:3000/api";
+// const API_BASE_URL = 'https://pilot-dev.dreamhosters.com/be/api/'
+const API_BASE_URL = "http://localhost:3000/api";
 
 class ApiService {
   async get(url) {
@@ -10,13 +10,13 @@ class ApiService {
     } catch (error) {
       console.error("Error en GET:", error);
       let errorMessage = "Error de conexión";
-      
+
       if (error.response) {
         // Error con respuesta del servidor
-        errorMessage = error.response.data?.error || 
-                      error.response.data?.message || 
-                      error.response.statusText || 
-                      `Error ${error.response.status}`;
+        errorMessage = error.response.data?.error ||
+          error.response.data?.message ||
+          error.response.statusText ||
+          `Error ${error.response.status}`;
       } else if (error.request) {
         // Error de red - no hubo respuesta
         errorMessage = "Error de conexión: No se pudo conectar al servidor";
@@ -24,7 +24,7 @@ class ApiService {
         // Error al configurar la petición
         errorMessage = error.message || "Error desconocido";
       }
-      
+
       return { success: false, error: errorMessage };
     }
   }
@@ -121,4 +121,14 @@ export const saleApi = {
   createWithItems: (saleData) => apiService.post("/sales/with-items", saleData),
   update: (id, saleData) => apiService.put(`/sales/${id}`, saleData),
   delete: (id) => apiService.delete(`/sales/${id}`),
+};
+
+// Endpoints específicos para estados de negocio
+export const businessStateApi = {
+  getBalance: () => apiService.get("/business-states/1"),
+};
+
+// Endpoints específicos para movimientos de negocio
+export const businessMovementApi = {
+  create: (movementData) => apiService.post("/business-movements", movementData),
 };

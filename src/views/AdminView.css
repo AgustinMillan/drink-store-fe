@@ -134,7 +134,7 @@
 
 .sales-list-header {
     display: grid;
-    grid-template-columns: 80px 1fr 150px 100px;
+    grid-template-columns: 80px 1fr 150px 100px 80px;
     gap: 15px;
     padding: 15px;
     background: rgba(100, 108, 255, 0.1);
@@ -150,20 +150,40 @@
     color: #667eea;
 }
 
+.sales-list-container {
+    margin-bottom: 8px;
+}
+
 .sales-list-item {
     display: grid;
-    grid-template-columns: 80px 1fr 150px 100px;
+    grid-template-columns: 80px 1fr 150px 100px 80px;
     gap: 15px;
     padding: 15px;
     background: white;
     border-radius: 6px;
-    margin-bottom: 8px;
     border: 1px solid rgba(100, 108, 255, 0.2);
-    transition: box-shadow 0.2s;
+    transition: all 0.2s;
+    cursor: pointer;
 }
 
 .sales-list-item:hover {
     box-shadow: 0 2px 8px rgba(100, 108, 255, 0.2);
+    background: rgba(100, 108, 255, 0.05);
+}
+
+.sales-list-item.expanded {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+    background: rgba(100, 108, 255, 0.08);
+}
+
+.expand-icon {
+    text-align: center;
+    font-size: 12px;
+    color: #667eea;
+    font-weight: bold;
+    transition: transform 0.2s;
 }
 
 .list-item-cell {
@@ -176,6 +196,122 @@
 }
 
 .list-item-cell:nth-child(3) {
+    font-weight: bold;
+    color: #4caf50;
+}
+
+/* Estilos para acordeón de detalles de venta */
+.sale-details {
+    background: rgba(100, 108, 255, 0.03);
+    border: 1px solid rgba(100, 108, 255, 0.2);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    padding: 20px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        max-height: 1000px;
+        transform: translateY(0);
+    }
+}
+
+.sale-details-header {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(100, 108, 255, 0.2);
+}
+
+.sale-details-header h4 {
+    margin: 0;
+    color: #667eea;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sale-details-list {
+    margin-top: 15px;
+}
+
+.sale-details-list-header {
+    display: grid;
+    grid-template-columns: 2fr 100px 120px 120px;
+    gap: 15px;
+    padding: 12px 15px;
+    background: rgba(100, 108, 255, 0.1);
+    border-radius: 6px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.detail-header-cell {
+    color: #667eea;
+}
+
+.sale-details-item {
+    display: grid;
+    grid-template-columns: 2fr 100px 120px 120px;
+    gap: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(100, 108, 255, 0.15);
+    transition: box-shadow 0.2s;
+}
+
+.sale-details-item:hover {
+    box-shadow: 0 2px 6px rgba(100, 108, 255, 0.15);
+}
+
+.detail-item-cell {
+    color: #213547;
+    display: flex;
+    align-items: center;
+}
+
+.detail-item-cell.product-name {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.product-info strong {
+    color: #213547;
+    font-size: 14px;
+}
+
+.product-description {
+    color: #666;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.detail-item-cell:nth-child(2),
+.detail-item-cell:nth-child(3),
+.detail-item-cell:nth-child(4) {
+    justify-content: center;
+    font-weight: 500;
+}
+
+.detail-item-cell:nth-child(4) {
     font-weight: bold;
     color: #4caf50;
 }
@@ -417,9 +553,32 @@
 
     .sales-list-header,
     .sales-list-item {
-        grid-template-columns: 60px 1fr 100px 60px;
+        grid-template-columns: 50px 1fr 90px 50px 40px;
         gap: 8px;
+        font-size: 11px;
+    }
+
+    .sale-details-list-header,
+    .sale-details-item {
+        grid-template-columns: 1fr 60px 80px 80px;
+        gap: 8px;
+        font-size: 11px;
+    }
+
+    .sale-details {
+        padding: 15px 10px;
+    }
+
+    .sale-details-header h4 {
+        font-size: 14px;
+    }
+
+    .product-info strong {
         font-size: 12px;
+    }
+
+    .product-description {
+        font-size: 10px;
     }
 
     .sales-by-day-header,
@@ -548,4 +707,75 @@
 .summary-value.profit-margin {
     color: #4caf50;
     font-size: 20px;
+}
+
+/* Estilos para sección de balance */
+.balance-section {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.95) 0%, rgba(25, 118, 210, 0.95) 100%);
+    border: 2px solid rgba(33, 150, 243, 0.3);
+}
+
+.balance-section .section-title {
+    color: white;
+}
+
+.balance-section .section-header {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.balance-container {
+    margin-top: 20px;
+}
+
+.balance-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.balance-card {
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    color: white;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.balance-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.balance-card.stock-value {
+    background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+}
+
+.balance-card.balance-amount {
+    background: linear-gradient(135deg, #ff5722 0%, #d84315 100%);
+}
+
+.balance-card .card-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    opacity: 0.95;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.balance-card .card-value {
+    font-size: 36px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    .balance-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .balance-card .card-value {
+        font-size: 28px;
+    }
 }

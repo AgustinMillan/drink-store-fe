@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { businessMovementApi } from '../services/api'
 import './AddProductModal.css'
 
 function AddProductModal({ isOpen, onClose, onSuccess }) {
@@ -71,6 +72,31 @@ function AddProductModal({ isOpen, onClose, onSuccess }) {
       const result = await productApi.create(productData)
 
       if (result.success) {
+        // Si el producto tiene stock inicial, crear un movimiento de compra (PURCHASE)
+        const initialStock = parseInt(formData.Stock) || 0
+        const productId = result.data?.Id || result.data?.id
+        
+        if (initialStock > 0 && productId) {
+          const unitCost = parseInt(formData.AmountSupplier) || 0
+          const movementData = {
+            ProductId: productId,
+            SupplierId: null, // No tenemos información del proveedor en este contexto
+            Type: 'IN', // Entrada de stock
+            Reason: 'PURCHASE', // Razón: compra
+            Quantity: initialStock,
+            UnitCost: unitCost > 0 ? unitCost : null,
+            TotalAmount: unitCost > 0 ? unitCost * initialStock : null,
+            ReferenceId: productId,
+            ReferenceType: 'Product'
+          }
+          
+          // Crear el movimiento (no esperamos el resultado para no bloquear la UI)
+          businessMovementApi.create(movementData).catch(error => {
+            console.error('Error al crear movimiento de compra:', error)
+            // No mostramos error al usuario ya que el producto ya fue creado
+          })
+        }
+
         // Limpiar formulario
         setFormData({
           Name: '',

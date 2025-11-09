@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import SelectProductModal from '../components/SelectProductModal'
-import { saleApi } from '../services/api'
+import { saleApi, businessMovementApi } from '../services/api'
 import './SaleView.css'
 
 function SaleView() {
@@ -98,6 +98,29 @@ function SaleView() {
       const result = await saleApi.createWithItems(saleData)
 
       if (result.success) {
+        // Crear movimientos de negocio para cada producto vendido
+        const saleId = result.data?.Id || result.data?.id
+        const movementPromises = cart.map(item => {
+          const movementData = {
+            ProductId: item.product.Id,
+            SupplierId: null,
+            Type: 'OUT', // Salida de stock
+            Reason: 'SALE', // Razón: venta
+            Quantity: item.quantity,
+            UnitCost: item.product.AmountSupplier || null,
+            TotalAmount: (item.product.AmountSupplier || 0) * item.quantity,
+            ReferenceId: saleId || null,
+            ReferenceType: 'Sale'
+          }
+          return businessMovementApi.create(movementData)
+        })
+
+        // Crear los movimientos (no esperamos el resultado para no bloquear la UI)
+        Promise.all(movementPromises).catch(error => {
+          console.error('Error al crear movimientos de negocio:', error)
+          // No mostramos error al usuario ya que la venta ya fue exitosa
+        })
+
         alert('Venta registrada exitosamente')
         
         // Limpiar formulario
