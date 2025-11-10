@@ -6,6 +6,8 @@ import './StockView.css'
 
 function StockView() {
   const [products, setProducts] = useState([])
+  const [filteredProducts, setFilteredProducts] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -19,7 +21,9 @@ function StockView() {
     try {
       const result = await productApi.getAll()
       if (result.success) {
-        setProducts(result.data || [])
+        const productsData = result.data || []
+        setProducts(productsData)
+        setFilteredProducts(productsData)
       } else {
         setError(result.error || 'Error al cargar los productos')
       }
@@ -30,6 +34,39 @@ function StockView() {
       setLoading(false)
     }
   }
+
+  // Filtrar productos basado en el término de búsqueda
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredProducts(products)
+      return
+    }
+
+    const term = searchTerm.toLowerCase().trim()
+    const filtered = products.filter(product => {
+      // Buscar en ID
+      const idMatch = product.Id?.toString().includes(term)
+      
+      // Buscar en nombre
+      const nameMatch = product.Name?.toLowerCase().includes(term)
+      
+      // Buscar en descripción
+      const descriptionMatch = product.Description?.toLowerCase().includes(term)
+      
+      // Buscar en precio de proveedor
+      const supplierPriceMatch = product.AmountSupplier?.toString().includes(term)
+      
+      // Buscar en precio público
+      const salePriceMatch = product.AmountToSale?.toString().includes(term)
+      
+      // Buscar en stock
+      const stockMatch = product.Stock?.toString().includes(term)
+
+      return idMatch || nameMatch || descriptionMatch || supplierPriceMatch || salePriceMatch || stockMatch
+    })
+
+    setFilteredProducts(filtered)
+  }, [searchTerm, products])
 
   useEffect(() => {
     fetchProducts()
@@ -81,6 +118,34 @@ function StockView() {
 
   return (
     <div className="stock-view">
+      {/* Barra de búsqueda */}
+      <div className="search-container">
+        <div className="search-box">
+          <span className="search-icon">🔍</span>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Buscar por ID, nombre, descripción, precio o stock..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              className="clear-search-button"
+              onClick={() => setSearchTerm('')}
+              title="Limpiar búsqueda"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        {searchTerm && (
+          <div className="search-results-info">
+            {filteredProducts.length} producto{filteredProducts.length !== 1 ? 's' : ''} encontrado{filteredProducts.length !== 1 ? 's' : ''}
+          </div>
+        )}
+      </div>
+
       {/* Encabezados de tabla */}
       <div className="table-header">
         <div className="header-cell">ID</div>
@@ -102,10 +167,12 @@ function StockView() {
               Reintentar
             </button>
           </div>
-        ) : products.length === 0 ? (
-          <div className="empty-message">No hay productos registrados</div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="empty-message">
+            {searchTerm ? 'No se encontraron productos que coincidan con la búsqueda' : 'No hay productos registrados'}
+          </div>
         ) : (
-          products.map((product) => (
+          filteredProducts.map((product) => (
             <div 
               key={product.Id} 
               className="product-row clickable"
