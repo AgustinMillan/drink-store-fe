@@ -1,6 +1,6 @@
 import axios from "axios";
-const API_BASE_URL = 'https://pilot-dev.dreamhosters.com/be/api/'
 // const API_BASE_URL = "http://localhost:3000/api";
+const API_BASE_URL = "drink-store-production.up.railway.app/api";
 
 class ApiService {
   async get(url) {
@@ -13,7 +13,8 @@ class ApiService {
 
       if (error.response) {
         // Error con respuesta del servidor
-        errorMessage = error.response.data?.error ||
+        errorMessage =
+          error.response.data?.error ||
           error.response.data?.message ||
           error.response.statusText ||
           `Error ${error.response.status}`;
@@ -130,5 +131,6 @@ export const businessStateApi = {
 
 // Endpoints específicos para movimientos de negocio
 export const businessMovementApi = {
-  create: (movementData) => apiService.post("/business-movements", movementData),
+  create: (movementData) =>
+    apiService.post("/business-movements", movementData),
 };
