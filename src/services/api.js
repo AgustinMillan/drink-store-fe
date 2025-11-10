@@ -1,6 +1,6 @@
 import axios from "axios";
 // const API_BASE_URL = "http://localhost:3000/api";
-const API_BASE_URL = "drink-store-production.up.railway.app/api";
+const API_BASE_URL = "https://drink-store-production.up.railway.app/api";
 
 class ApiService {
   async get(url) {
