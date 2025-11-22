@@ -108,7 +108,7 @@ function SaleView() {
             Reason: 'SALE', // Razón: venta
             Quantity: item.quantity,
             UnitCost: item.product.AmountSupplier || null,
-            TotalAmount: (item.product.AmountSupplier || 0) * item.quantity,
+            TotalAmount: (item.product.AmountToSale || 0) * item.quantity,
             ReferenceId: saleId || null,
             ReferenceType: 'Sale'
           }

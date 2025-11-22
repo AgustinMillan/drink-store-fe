@@ -4,7 +4,6 @@ function BottomNavbar({ activeView, onViewChange }) {
   const buttons = [
     { id: 'sale', label: 'Vender', icon: '💲' },
     { id: 'stock', label: 'Stock', icon: '📦' },
-    { id: 'suppliers', label: 'Proveedores', icon: '👥' },
     { id: 'admin', label: 'Administración', icon: '📊' }
   ]
 
