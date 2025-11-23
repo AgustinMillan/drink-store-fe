@@ -120,6 +120,7 @@ export const saleApi = {
     apiService.get("/sales/financial-report/current-month"),
   create: (saleData) => apiService.post("/sales", saleData),
   createWithItems: (saleData) => apiService.post("/sales/with-items", saleData),
+  createWithPromotion: (saleData) => apiService.post("/sales/with-promotion", saleData),
   update: (id, saleData) => apiService.put(`/sales/${id}`, saleData),
   delete: (id) => apiService.delete(`/sales/${id}`),
 };
@@ -133,4 +134,14 @@ export const businessStateApi = {
 export const businessMovementApi = {
   create: (movementData) =>
     apiService.post("/business-movements", movementData),
+};
+
+// Endpoints específicos para promociones
+export const promotionApi = {
+  getAll: () => apiService.get("/promotions"),
+  getAllActive: () => apiService.get("/promotions/active"),
+  getById: (id) => apiService.get(`/promotions/${id}`),
+  create: (promotionData) => apiService.post("/promotions", promotionData),
+  update: (id, promotionData) => apiService.put(`/promotions/${id}`, promotionData),
+  delete: (id) => apiService.delete(`/promotions/${id}`),
 };
